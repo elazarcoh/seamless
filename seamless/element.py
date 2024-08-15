@@ -1,15 +1,16 @@
 from typing import TYPE_CHECKING, TypeVar, Generic, Unpack
 
 from .internal import to_iter
-from .types.html import HTMLElement
 from .rendering.props import transform_props
 
+if TYPE_CHECKING:
+    from .types.html_element import HTMLElement
 
 if TYPE_CHECKING:
     from seamless.types import ChildrenType, ChildType
 
 
-PropsType = TypeVar("PropsType", bound=HTMLElement)
+PropsType = TypeVar("PropsType", bound="HTMLElement")
 
 
 class Element(Generic[PropsType]):
