@@ -1,5 +1,20 @@
 {
   "cSpell.words": [
     "Renderable"
-  ]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "python": "html"
+  },
+  "css.customData": [
+    ".vscode/tailwind.json"
+  ],
+  "tailwindCSS.classAttributes": [
+    "class_name",
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  }
 }

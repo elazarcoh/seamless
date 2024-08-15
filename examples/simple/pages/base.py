@@ -7,7 +7,7 @@ class BasePage(Page):
         yield from super().head()
         yield Link(
             rel="stylesheet",
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+            href="/static/main.css",
         )
         yield Script(src="https://cdn.jsdelivr.net/npm/@python-seamless/core@0.8.6/umd/seamless.init.js", defer=True)
         yield Style(
