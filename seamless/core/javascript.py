@@ -1,5 +1,5 @@
 from os import PathLike
-from typing import overload
+from typing import TypeAlias, overload
 from seamless.internal import SEAMLESS_ELEMENT_ATTRIBUTE, SEAMLESS_INIT_ATTRIBUTE
 from seamless.rendering.transformers import transformer_for
 
@@ -52,4 +52,4 @@ def transform_event_source(key: str, source: JavaScript, props):
     del props[key]
 
 
-JS = JavaScript
+JS: TypeAlias = JavaScript
