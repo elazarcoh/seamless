@@ -1,28 +1,62 @@
-from seamless import A, JS, Component, Div, Nav, Button
-from seamless.extensions import State
-from pages import HomePage, CounterPage, BasePage
-from components.loading import Loading
+from typing import Sequence
+from fastapi import Request
+from seamless import JS, A, Button, Component, Div, Form, Fragment, Span
+from starlette_wtf import StarletteForm
+from wtforms import StringField, SubmitField, ValidationError
+from wtforms.validators import DataRequired, Length
+
+from pages import BasePage
+
+
+class MyForm(StarletteForm):
+    name = StringField("name", validators=[DataRequired(), Length(min=1)])
+
+    submit = SubmitField("Submit")
+
+    async def async_validate_name(self, field: StringField):
+        if not field.data:
+            raise ValidationError("Name cannot be empty.")
+        if field.data.lower() == "admin":
+            raise ValidationError("Name cannot be 'admin'.")
+        if len(field.data) < 3:
+            raise ValidationError("Name must be at least 3 characters long.")
+        return
+
+
+class ErrorsComponent(Component):
+    def __init__(self, *, errors: Sequence[str]):
+        self.errors = errors
+
+    def render(self):
+        return Div(
+            *[Span(error) for error in self.errors],
+            class_="text-red-500",
+        )
+
+
+class FormComponent(Component):
+    def __init__(self, *, form: MyForm):
+        self.form = form
+
+    def render(self):
+        return Form(hx_post="/", hx_swap="outerHTML")(
+            self.form.name(
+                placeholder="Name",
+                class_="input input-bordered w-full max-w-xs",
+            ),
+            ErrorsComponent(errors=self.form.name.errors)
+            if self.form.name.errors
+            else None,
+            self.form.submit(class_="btn btn-primary"),
+        )
 
 
 class App(Component):
+    def __init__(self, form: MyForm):
+        super().__init__()
+        self.form = form
+
     def render(self):
         return BasePage(
-            State.init(),
-            Div(class_name="d-flex flex-column h-100")(
-                Div(class_name="d-flex justify-content-between")(
-                    Nav(class_name="navbar navbar-expand-lg navbar-light bg-light")(
-                        A(href="/", class_name="navbar-brand")("Home"),
-                        A(href="/counter", class_name="navbar-brand")("Counter"),
-                    ),
-                    Div(
-                        Button(on_click=self.foo(), class_name="btn btn-primary")(
-                            "Click me!"
-                        )
-                    )
-                ),
-            ),
-            title="Seamless",
+            FormComponent(form=self.form),
         )
-
-    def foo(self):
-        return JS("console.log('foo')")

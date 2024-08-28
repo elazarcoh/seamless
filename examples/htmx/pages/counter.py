@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from seamless import Div, Form, Input, Button, Component
+from seamless import H1, H6, Div, Form, Input, Button, Component
 from seamless.core import SocketID
 from seamless.extensions import State
 from seamless.types.events import SubmitEvent
@@ -14,10 +14,10 @@ counter = State("counter", 0)
 
 class CounterPage(Component):
     def render(self):
-        return Div(class_name="container")(
-            Div(class_name="row")(
-                Div(class_name="display-1 text-center")("Counter"),
-                Div(class_name="display-6 text-center")("A simple counter page."),
+        return Div(class_name="container flex flex-col items-center")(
+            Div(class_name="flex flex-row items-center")(
+                H1(class_name="text-center")("Counter"),
+                H6(class_name="text-center")("A simple counter page."),
             ),
             Div(class_name="row mt-4")(
                 Div(class_name="lead col-12 text-center")(

@@ -16,12 +16,13 @@
 		],
 		"tailwindCSS.classAttributes": [
 			"class_name",
+			"class_",
 		],
 		"files.associations": {
 			"*.css": "tailwindcss"
 		},
 		"editor.quickSuggestions": {
 			"strings": "on"
-		}
+		},
 	}
 }
