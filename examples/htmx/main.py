@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
-from seamless import Div, render
+from seamless import Button, Div, render
 from seamless.context.context import set_global_context
 from sse_starlette.sse import EventSourceResponse
 
@@ -24,21 +24,7 @@ HERE = Path(__file__).parent
 RETRY_TIMEOUT = 15000  # milisecond
 
 
-class SSEClients:
-    def send_close_all(self):
-        pass
-
-
-sse_clients = SSEClients()
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-    sse_clients.send_close_all()
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 
 @app.get("/static/{file_path:path}")
@@ -58,7 +44,7 @@ async def get_sse(request: Request):
 
                 message_id = uuid.uuid4().hex
 
-                sse_event = {
+                yield {
                     "event": "counter",
                     "id": message_id,
                     "retry": RETRY_TIMEOUT,
@@ -66,7 +52,6 @@ async def get_sse(request: Request):
                         Div(f"Counter: {i}"),
                     ),
                 }
-                yield sse_event
                 await asyncio.sleep(1)
 
             yield {
@@ -74,7 +59,14 @@ async def get_sse(request: Request):
                 "id": uuid.uuid4().hex,
                 "retry": RETRY_TIMEOUT,
                 "data": render(
-                    Div("Counter is done."),
+                    Div(class_="flex flex-row items-center gap-2")(
+                        Div(class_="text-md font-semibold text-green-500")("Counter is done."),
+                        Button(
+                            hx_get="/sse/counter",
+                            hx_swap="outerHTML",
+                            class_="btn btn-circle btn-ghost",
+                        )("↺"),
+                    )
                 ),
             }
             await asyncio.sleep(0.1)
@@ -91,7 +83,23 @@ async def get_sse(request: Request):
             # Do any other cleanup, if any
             raise e
 
+    # simulate delay
+    # await asyncio.sleep(2)
+
     return EventSourceResponse(event_publisher())
+
+
+@app.get("/sse/counter")
+@seamless_response
+async def get_sse_counter(request: Request):
+    return Div(
+        sse_swap="counter",
+        class_="border border-neutral p-4",
+        sse_connect="/sse",
+        sse_close="close",
+    )(
+        "Waiting for server counter...",
+    )
 
 
 @app.get("/")

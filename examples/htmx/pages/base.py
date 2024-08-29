@@ -1,4 +1,4 @@
-from seamless import A, Div, Link, Script, Style
+from seamless import A, JS, Div, Link, Script, Style
 from seamless.components import Page
 from seamless.styling import CSS
 
@@ -16,8 +16,6 @@ class BasePage(Page):
             "height-viewport": True,
             "class": "h-svh p-0 overflow-hidden",
             "hx-ext": "sse",
-            "sse-connect": "/sse",
-            "sse-close": "close",
         }
 
     def head(self):
@@ -33,8 +31,6 @@ class BasePage(Page):
             yield HTMX.script(defer=True)
 
         yield HtmxExtensions.sse.script(defer=True)
-
-        yield Style("html, body { height: 100%; }" + CSS.to_css_string(minified=True))
 
     def body(self):
         yield Script("""{
@@ -57,10 +53,12 @@ class BasePage(Page):
             Div(class_name="navbar bg-base-300")(
                 A(hx_boost="", href="/", class_name="btn btn-ghost")("Home"),
             ),
-            Div(
-                class_name="container flex flex-col items-center justify-center h-full",
-                id="main",
-            )(
-                *super().body(),
+            Div(class_name="flex flex-row h-full justify-center")(
+                Div(
+                    class_name="container h-full",
+                    id="main",
+                )(
+                    *super().body(),
+                ),
             ),
         )
