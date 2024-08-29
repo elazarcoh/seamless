@@ -1,4 +1,4 @@
 {
-    "enableExperimentalFeatures": true,
+    "enableExperimentalFeatures": false,
     "stubPath": "./typings"
 }
