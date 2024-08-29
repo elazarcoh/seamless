@@ -1,4 +1,4 @@
-from seamless import A, Div, Link, Style
+from seamless import A, Div, Link, Script, Style
 from seamless.components import Page
 from seamless.styling import CSS
 
@@ -17,6 +17,7 @@ class BasePage(Page):
             "class": "h-svh p-0 overflow-hidden",
             "hx-ext": "sse",
             "sse-connect": "/sse",
+            "sse-close": "close",
         }
 
     def head(self):
@@ -36,7 +37,23 @@ class BasePage(Page):
         yield Style("html, body { height: 100%; }" + CSS.to_css_string(minified=True))
 
     def body(self):
-        return Div(class_name="flex flex-col h-svh")(
+        yield Script("""{
+            document.body.addEventListener('htmx:sseClose', function (e) {
+                const reason = e.detail.type
+                switch(reason) {
+                    case "nodeMissing":
+                        // Parent node is missing and therefore connection was closed
+                        console.log("Parent node is missing and therefore connection was closed"); break;  
+                    case "nodeReplaced":
+                        // Parent node replacement caused closing of connection
+                        console.log("Parent node replacement caused closing of connection"); break;
+                    case "message":
+                        // connection was closed due to reception of message sse-close
+                        console.log("connection was closed due to reception of message sse-close"); break;
+                }
+            });
+        }""")
+        yield Div(class_name="flex flex-col h-svh")(
             Div(class_name="navbar bg-base-300")(
                 A(hx_boost="", href="/", class_name="btn btn-ghost")("Home"),
             ),

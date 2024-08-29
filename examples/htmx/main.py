@@ -52,7 +52,7 @@ async def get_sse(request: Request):
         i = 0
 
         try:
-            while True:
+            while i < 4:
                 # yield dict(id=..., event=..., data=...)
                 i += 1
 
@@ -68,6 +68,25 @@ async def get_sse(request: Request):
                 }
                 yield sse_event
                 await asyncio.sleep(1)
+
+            yield {
+                "event": "counter",
+                "id": uuid.uuid4().hex,
+                "retry": RETRY_TIMEOUT,
+                "data": render(
+                    Div("Counter is done."),
+                ),
+            }
+            await asyncio.sleep(0.1)
+
+            yield {
+                "event": "close",
+                "id": uuid.uuid4().hex,
+                "retry": RETRY_TIMEOUT,
+                "data": "",
+            }
+            await asyncio.sleep(0.1)
+
         except asyncio.CancelledError as e:
             # Do any other cleanup, if any
             raise e
