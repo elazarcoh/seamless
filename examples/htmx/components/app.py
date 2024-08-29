@@ -57,6 +57,10 @@ class App(Component):
         self.form = form
 
     def render(self):
-        return BasePage(
+        return BasePage()(
+            # Server counter
+            Div(sse_swap="counter", class_="border border-neutral p-4")(
+                "Waiting for server counter...",
+            ),
             FormComponent(form=self.form),
         )

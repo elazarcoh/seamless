@@ -1,20 +1,44 @@
+import asyncio
+import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
-from seamless import Div
+from seamless import Div, render
 from seamless.context.context import set_global_context
+from sse_starlette.sse import EventSourceResponse
 
 from components.app import App, FormComponent, MyForm
-from htmx_setup import HTMXSupportedContext, wrap_non_htmx
-from pages.base import BasePage
+from htmx_setup import HtmxExtensions, HTMXSupportedContext
 from seamless_response import seamless_response
 
-set_global_context(HTMXSupportedContext.default())
+ctx = HTMXSupportedContext.default()
+ctx.add_extensions(
+    HtmxExtensions.sse,
+    # HtmxExtensions.json_enc,
+)
+set_global_context(ctx)
 
 HERE = Path(__file__).parent
+RETRY_TIMEOUT = 15000  # milisecond
 
-app = FastAPI()
+
+class SSEClients:
+    def send_close_all(self):
+        pass
+
+
+sse_clients = SSEClients()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    sse_clients.send_close_all()
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/static/{file_path:path}")
@@ -22,12 +46,33 @@ def read_static(file_path: str):
     return FileResponse(HERE / "static" / file_path)
 
 
-# @app.get("/counter")
-# @seamless_response
-# @wrap_non_htmx(BasePage)
-# def get_counter():
-#     from pages.counter import CounterPage
-#     return CounterPage()
+@app.get("/sse")
+async def get_sse(request: Request):
+    async def event_publisher():
+        i = 0
+
+        try:
+            while True:
+                # yield dict(id=..., event=..., data=...)
+                i += 1
+
+                message_id = uuid.uuid4().hex
+
+                sse_event = {
+                    "event": "counter",
+                    "id": message_id,
+                    "retry": RETRY_TIMEOUT,
+                    "data": render(
+                        Div(f"Counter: {i}"),
+                    ),
+                }
+                yield sse_event
+                await asyncio.sleep(1)
+        except asyncio.CancelledError as e:
+            # Do any other cleanup, if any
+            raise e
+
+    return EventSourceResponse(event_publisher())
 
 
 @app.get("/")

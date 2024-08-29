@@ -1,11 +1,24 @@
-from seamless import A, Div, Link, Script, Style, __version__
+from seamless import A, Div, Link, Style
 from seamless.components import Page
 from seamless.styling import CSS
 
-from htmx_setup import HTMX_SCRIPT
+from htmx_setup import HTMX, HtmxExtensions
+
+# TODO: get this from environment
+IS_DEV = True
 
 
 class BasePage(Page):
+    def __init__(self):
+        super().__init__()
+        self._body_props = {
+            **self._body_props,
+            "height-viewport": True,
+            "class": "h-svh p-0 overflow-hidden",
+            "hx-ext": "sse",
+            "sse-connect": "/sse",
+        }
+
     def head(self):
         yield from super().head()
         yield Link(
@@ -13,7 +26,13 @@ class BasePage(Page):
             href="/static/main.css",
         )
 
-        yield HTMX_SCRIPT
+        if IS_DEV:
+            yield HTMX.unminified_script(defer=True)
+        else:
+            yield HTMX.script(defer=True)
+
+        yield HtmxExtensions.sse.script(defer=True)
+
         yield Style("html, body { height: 100%; }" + CSS.to_css_string(minified=True))
 
     def body(self):
