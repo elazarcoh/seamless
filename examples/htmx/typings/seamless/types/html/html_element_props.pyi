@@ -1,7 +1,7 @@
 from typing_extensions import TypedDict
-from seamless.types.html.AriaProps import AriaProps
-from seamless.types.html.HTMLElement import HTMLElement
-from seamless.types.html.HTMLEventProps import HTMLEventProps
+from seamless.types.html.aria_props import AriaProps
+from seamless.types.html.html_element import HTMLElement
+from seamless.types.html.html_event_props import HTMLEventProps
 
 class HTMXProps(TypedDict, total=False):
     hx_get: str
