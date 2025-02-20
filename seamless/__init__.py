@@ -1,14 +1,13 @@
 import os
 
 from pydom import Component
+from pydom.html import *
 
 from .context import Context, set_global_context
 from .core import JS
 from .internal.constants import DISABLE_GLOBAL_CONTEXT_ENV
-from .html import *
 from .rendering import render
 from .version import version as __version__
-
 
 if not os.getenv(DISABLE_GLOBAL_CONTEXT_ENV):
     set_global_context(Context.standard())
