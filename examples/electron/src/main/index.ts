@@ -9,6 +9,8 @@ import readline from 'readline'
 const API_HOST = '127.80.81.1'
 const API_PROD_PATH = join(process.resourcesPath, '../lib/api/api.exe')
 const API_DEV_PATH = join(__dirname, '../../engine/dev.py')
+// use EXISTING_SERVER_PORT environment variable if you want to attach to an existing server instead of spawning a new one.
+const EXISTING_SERVER_PORT = process.env.EXISTING_SERVER_PORT
 
 async function getPortFree() {
   return new Promise((res) => {
@@ -31,14 +33,16 @@ function startAPI(port) {
     const python = 'python'
 
     try {
-      const proc = spawn(python, [API_DEV_PATH], {
+      const proc = spawn(python, [`${API_DEV_PATH}`], {
         windowsHide: true,
+        cwd: join(__dirname, '../../engine'),
         env: {
           ...process.env,
-          PORT: port.toString(),
-          HOST: API_HOST,
+          UVICORN_PORT: port.toString(),
+          UVICORN_HOST: API_HOST,
           PYTHONUNBUFFERED: '1'
-        }
+        },
+        shell: true
       })
       readline
         .createInterface({
@@ -134,9 +138,14 @@ function startApp(port) {
 }
 
 async function start() {
-  const port = await getPortFree()
-  startAPI(port)
-  startApp(port)
+  if (EXISTING_SERVER_PORT) {
+    startApp(EXISTING_SERVER_PORT)
+    return
+  } else {
+    const port = await getPortFree()
+    startAPI(port)
+    startApp(port)
+  }
 }
 
 start()
