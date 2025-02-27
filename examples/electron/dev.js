@@ -16,9 +16,11 @@ const { result } = concurrently(
       name: 'Python',
       cwd: path.resolve(__dirname),
       env: {
+        PYTHONUNBUFFERED: '1',
         UVICORN_PORT: EXISTING_SERVER_PORT,
         UVICORN_HOST: '0.0.0.0'
-      }
+      },
+      raw: true
     }
   ],
   {
