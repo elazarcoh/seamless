@@ -1,7 +1,7 @@
-from pydom.styling import StyleObject, CSS, Color
+from pydom.styling import StyleSheet, CSS, Color
 
 __all__ = [
-    "StyleObject",
+    "StyleSheet",
     "CSS",
     "Color",
 ]
